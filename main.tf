@@ -51,7 +51,7 @@ resource "azurerm_network_interface" "test_ardagh_nic" {
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                    = azurerm_subnet.test_ardagh_subnet
+    subnet_id                    = azurerm_subnet.test_ardagh_subnet.id
     private_ip_address_allocation = "Dynamic"
   }
 }
