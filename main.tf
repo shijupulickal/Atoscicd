@@ -24,69 +24,62 @@ terraform {
   }
 }*/
 
-resource "azurerm_resource_group" "example" {
-  name     = "example-resources5"
-  location = "West Europe"
+
+resource "azurerm_resource_group" "test_ardagh_rg" {
+  name     = "test_ardagh"
+  location = "East US"
 }
 
-resource "azurerm_virtual_network" "example" {
-  name                = "example-network3"
+resource "azurerm_virtual_network" "test_ardagh_vnet" {
+  name                = "test_ardagh-vnet"
   address_space       = ["10.0.0.0/16"]
-  location            = azurerm_resource_group.example.location
-  resource_group_name = azurerm_resource_group.example.name
+  location            = azurerm_resource_group.test_ardagh_rg.location
+  resource_group_name = azurerm_resource_group.test_ardagh_rg.name
 }
 
-resource "azurerm_subnet" "example" {
-  name                 = "example-subnet3"
-  resource_group_name  = azurerm_resource_group.example.name
-  virtual_network_name = azurerm_virtual_network.example.name
-  address_prefixes     = ["10.0.2.0/24"]
+resource "azurerm_subnet" "test_ardagh-subnet" {
+  name                 = "test_ardagh-subnet"
+  resource_group_name  = azurerm_resource_group.test_ardagh_rg.name
+  virtual_network_name = azurerm_virtual_network.test_ardagh_vnet.name
+  address_prefixes     = ["10.0.1.0/24"]
 }
 
-resource "azurerm_network_interface" "example" {
-  name                = "example-nic3"
-  location            = azurerm_resource_group.example.location
-  resource_group_name = azurerm_resource_group.example.name
+resource "azurerm_network_interface" "test_ardagh_nic" {
+  name                = "test_ardagh_nic"
+ location            = azurerm_resource_group.test_ardagh_rg.location
+ resource_group_name = azurerm_resource_group.test_ardagh_rg.name
 
   ip_configuration {
-    name                          = "internal2"
-    subnet_id                     = azurerm_subnet.example.id
+    name                          = "internal"
+    subnet_id                    = test_ardagh-subnet.id
     private_ip_address_allocation = "Dynamic"
   }
 }
 
-resource "azurerm_virtual_machine" "example" {
-  name                  = "example-machine3"
-  location              = azurerm_resource_group.example.location
-  resource_group_name   = azurerm_resource_group.example.name
-  network_interface_ids = [azurerm_network_interface.example.id]
-  vm_size               = "Standard_DS1_v2"
+resource "azurerm_windows_virtual_machine" "test_ardagh_" {
+  name                = "example-vm"
+  location            = azurerm_resource_group.test_ardagh_rg.location
+  resource_group_name = azurerm_resource_group.test_ardagh_rg.name
+  size                = "Standard_DS1_v2"
+  admin_username      = "adminuser"
+  admin_password      = "P@ssw0rd1234!" # Ensure this meets Azure's password policy
+  network_interface_ids = [
+    azurerm_network_interface.test_ardagh_nic.id,
+  ]
 
-  storage_image_reference {
-    publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "18.04-LTS"
+  os_disk {
+    caching              = "ReadWrite"
+    create_option        = "FromImage"
+  }
+
+  source_image_reference {
+    publisher = "MicrosoftWindowsServer"
+    offer     = "WindowsServer"
+    sku       = "2019-Datacenter"
     version   = "latest"
   }
+}
 
-  storage_os_disk {
-    name              = "example-os-disk"
-    caching           = "ReadWrite"
-    create_option     = "FromImage"
-    managed_disk_type = "Standard_LRS"
-  }
-
-  os_profile {
-    computer_name  = "example-machine"
-    admin_username = "adminuser"
-    admin_password = "AdminPassword123!"
-  }
-
-  os_profile_linux_config {
-    disable_password_authentication = false
-  }
-
-  tags = {
-    environment = "testing"
-  }
+output "public_ip" {
+  value = azurerm_network_interface.test_ardagh_nic.ip_configuration[0].private_ip_address
 }
