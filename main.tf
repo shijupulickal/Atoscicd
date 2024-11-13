@@ -37,7 +37,7 @@ resource "azurerm_virtual_network" "test_ardagh_vnet" {
   resource_group_name = azurerm_resource_group.test_ardagh_rg.name
 }
 
-resource "azurerm_subnet" "test_ardagh-subnet" {
+resource "azurerm_subnet" "test_ardagh_subnet" {
   name                 = "test_ardagh-subnet"
   resource_group_name  = azurerm_resource_group.test_ardagh_rg.name
   virtual_network_name = azurerm_virtual_network.test_ardagh_vnet.name
@@ -51,7 +51,7 @@ resource "azurerm_network_interface" "test_ardagh_nic" {
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                    = test_ardagh-subnet.id
+    subnet_id                    = azurerm_subnet.test_ardagh_subnet
     private_ip_address_allocation = "Dynamic"
   }
 }
