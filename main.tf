@@ -69,8 +69,9 @@ resource "azurerm_windows_virtual_machine" "test_ardagh_" {
 
   os_disk {
     caching              = "ReadWrite"
-    create_option        = "FromImage"
+    storage_account_type = "Standard_LRS"
   }
+  
 
   source_image_reference {
     publisher = "MicrosoftWindowsServer"
